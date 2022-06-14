@@ -1,0 +1,9 @@
+namespace NtapipatternsearcherV1
+{
+    [default_interface]
+    runtimeclass x64dbgntdll : Windows.UI.Xaml.Controls.Page
+    {
+        x64dbgntdll();
+        Int32 MyProperty;
+    }
+}
