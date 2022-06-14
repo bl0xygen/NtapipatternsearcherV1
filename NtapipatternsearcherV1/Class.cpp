@@ -257,7 +257,7 @@ void NtPatternClass::LocateBytes(char* pattern, char* arr, size_t arrsize, uintp
 	auto it = std::search(memblock.begin(), memblock.end(), std::boyer_moore_searcher(substr.begin(), substr.end(), predicate));
 	if (it != memblock.end()) {
 
-		//calculate rva off offset and return
+		//calculate rva of offset and return
 
 		uintptr_t foundbytes = (currentAdd - info.base) + (it - memblock.begin());
 
