@@ -249,7 +249,7 @@ void NtPatternClass::LocateBytes(char* pattern, char* arr, size_t arrsize, uintp
 	std::vector<char>memblock(arr, arr + arrsize);
 
 	auto predicate = [](char memblock, char substr) {
-		return (memblock == substr || substr == '?');
+		return (memblock == substr || substr == '?');// //todo: fix wildcards not matching
 	};
 
 	std::string_view substr = pattern;
