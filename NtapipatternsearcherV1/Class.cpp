@@ -230,7 +230,7 @@ void NtPatternClass::IterateModules(uintptr_t procid, char* pattern) {
 			}
 
 
-			//increment the size of the page returned until we are at the end of the module
+			//increment for the size of the page returned by mbi until at the end of the module
 			currentAdd += mbi.RegionSize;
 
 		} while (currentAdd != end);
