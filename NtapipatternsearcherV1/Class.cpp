@@ -17,7 +17,7 @@ uintptr_t NtPatternClass::FindId(const wchar_t* exename) {
 
 	NTSTATUS status = NtQuerySystemInformation(SystemProcessInformation, nullptr, 0, &buffersize);
 
-	/* operation succeeded now we create a buffer of the appropriate size */
+	/* operation succeeded now create a buffer of the appropriate size */
 	PVOID buffer = malloc(buffersize);
 	pspi = (PSYSTEM_PROCESS_INFORMATION)buffer;
 
@@ -84,7 +84,6 @@ void NtPatternClass::GetRemotePEBmodules(uintptr_t procid) {
 
 	printf("\nProcess Handle opened with PROCESS_QUERY_INFORMATION | PROCESS_VM_READ privileges\n");
 
-	/* after this next call do not need readvirtualmeme yet, but lets get it set up anyway for later */
 
 	tdNtReadVirtualMemory NtReadVirtualMem = 0;
 	NtReadVirtualMem = (tdNtReadVirtualMemory)GetProcAddress(hMod, "NtReadVirtualMemory");
@@ -168,6 +167,9 @@ void NtPatternClass::IterateModules(uintptr_t procid, char* pattern) {
 	tdNtOpenProcess NtOpenProc = 0;
 	NtOpenProc = (tdNtOpenProcess)GetProcAddress(hMod, "NtOpenProcess");
 
+	tdNtClose tNtClose = 0;
+	tNtClose = (tdNtClose)GetProcAddress(hMod, "NtClose");
+
 	tdNtQueryVirtualMemory NtQueryVirtualMem = 0;
 	NtQueryVirtualMem = (tdNtQueryVirtualMemory)GetProcAddress(hMod, "NtQueryVirtualMemory");
 
@@ -192,9 +194,9 @@ void NtPatternClass::IterateModules(uintptr_t procid, char* pattern) {
 
 
 	for (int i = 0; i < info.ModuleBaseAdd.size(); i++) {
+		
 		info.base = info.ModuleBaseAdd[i];
 		std::wcout << "Module Names: " << info.ModuleName[i] << std::endl;
-
 
 		//call mbi on the starting address and fill an array with the first page returned
 
@@ -240,7 +242,8 @@ void NtPatternClass::IterateModules(uintptr_t procid, char* pattern) {
 			delete[] memory;
 		}
 	}
-
+	FreeLibrary(hMod);
+	tNtClose(processhandle);
 }
 
 
@@ -249,7 +252,7 @@ void NtPatternClass::LocateBytes(char* pattern, char* arr, size_t arrsize, uintp
 	std::vector<char>memblock(arr, arr + arrsize);
 
 	auto predicate = [](char memblock, char substr) {
-		return (memblock == substr || substr == '?');
+		return (memblock == substr || substr == '?'); //todo: fix wildcards not matching
 	};
 
 	std::string_view substr = pattern;
@@ -257,7 +260,7 @@ void NtPatternClass::LocateBytes(char* pattern, char* arr, size_t arrsize, uintp
 	auto it = std::search(memblock.begin(), memblock.end(), std::boyer_moore_searcher(substr.begin(), substr.end(), predicate));
 	if (it != memblock.end()) {
 
-		//calculate rva off offset and return
+		//calculate rva of offset and return
 
 		uintptr_t foundbytes = (currentAdd - info.base) + (it - memblock.begin());
 
