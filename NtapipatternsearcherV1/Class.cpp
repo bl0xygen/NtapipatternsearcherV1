@@ -17,7 +17,7 @@ uintptr_t NtPatternClass::FindId(const wchar_t* exename) {
 
 	NTSTATUS status = NtQuerySystemInformation(SystemProcessInformation, nullptr, 0, &buffersize);
 
-	/* operation succeeded now we create a buffer of the appropriate size */
+	/* operation succeeded now create a buffer of the appropriate size */
 	PVOID buffer = malloc(buffersize);
 	pspi = (PSYSTEM_PROCESS_INFORMATION)buffer;
 
@@ -83,8 +83,6 @@ void NtPatternClass::GetRemotePEBmodules(uintptr_t procid) {
 	}
 
 	printf("\nProcess Handle opened with PROCESS_QUERY_INFORMATION | PROCESS_VM_READ privileges\n");
-
-	/* after this next call do not need readvirtualmeme yet, but lets get it set up anyway for later */
 
 	tdNtReadVirtualMemory NtReadVirtualMem = 0;
 	NtReadVirtualMem = (tdNtReadVirtualMemory)GetProcAddress(hMod, "NtReadVirtualMemory");
