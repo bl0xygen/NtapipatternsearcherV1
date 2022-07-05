@@ -110,7 +110,7 @@ void NtPatternClass::GetRemotePEBmodules(uintptr_t procid) {
 
 	std::cout << "\n Peb - Image Base Address: " << peb.ImageBaseAddress << "\n";
 
-	PEB_LDR_DATA pebloader = { 0 }; //copy the loader which contains the head of the linked list to get our first forward flink
+	PEB_LDR_DATA pebloader = { 0 }; //copy the loader which contains the head of the linked list to get the first forward flink
 
 	status = NtReadVirtualMem(processhandle, (BYTE*)peb.Ldr, &pebloader, sizeof(PEB_LDR_DATA), NULL);
 
