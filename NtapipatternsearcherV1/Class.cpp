@@ -219,7 +219,7 @@ void NtPatternClass::IterateModules(uintptr_t procid, char* pattern) {
 			}
 			//Could call NtProtectVirtualMemory here to change page access protections 
 
-			if (mbi.State == MEM_COMMIT) {//if the state is mem_commit it's time to read
+			if (mbi.State == MEM_COMMIT) {
 				if (memory != NULL) {
 					delete[] memory;			
 				}
