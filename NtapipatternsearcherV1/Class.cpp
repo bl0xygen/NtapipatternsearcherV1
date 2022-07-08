@@ -85,6 +85,7 @@ void NtPatternClass::GetRemotePEBmodules(uintptr_t procid) {
 	printf("\nProcess Handle opened with PROCESS_QUERY_INFORMATION | PROCESS_VM_READ privileges\n");
 
 
+
 	tdNtReadVirtualMemory NtReadVirtualMem = 0;
 	NtReadVirtualMem = (tdNtReadVirtualMemory)GetProcAddress(hMod, "NtReadVirtualMemory");
 
@@ -111,7 +112,7 @@ void NtPatternClass::GetRemotePEBmodules(uintptr_t procid) {
 
 	std::cout << "\n Peb - Image Base Address: " << peb.ImageBaseAddress << "\n";
 
-	PEB_LDR_DATA pebloader = { 0 }; //copy the loader which contains the head of the linked list to get our first forward flink
+	PEB_LDR_DATA pebloader = { 0 }; //copy the loader which contains the head of the linked list to get the first forward flink
 
 	status = NtReadVirtualMem(processhandle, (BYTE*)peb.Ldr, &pebloader, sizeof(PEB_LDR_DATA), NULL);
 
@@ -223,7 +224,7 @@ void NtPatternClass::IterateModules(uintptr_t procid, char* pattern) {
 			}
 			//Could call NtProtectVirtualMemory here to change page access protections 
 
-			if (mbi.State == MEM_COMMIT) {//if the state is mem_commit it's time to read
+			if (mbi.State == MEM_COMMIT) {
 				if (memory != NULL) {
 					delete[] memory;			
 				}
@@ -234,7 +235,7 @@ void NtPatternClass::IterateModules(uintptr_t procid, char* pattern) {
 			}
 
 
-			//increment the size of the page returned until we are at the end of the module
+			//increment for the size of the page returned by mbi until at the end of the module
 			currentAdd += mbi.RegionSize;
 
 		} while (currentAdd != end);
@@ -253,6 +254,7 @@ void NtPatternClass::LocateBytes(char* pattern, char* arr, size_t arrsize, uintp
 
 	auto predicate = [](char memblock, char substr) {
 		return (memblock == substr || substr == '?'); //todo: fix wildcards not matching
+		return (memblock == substr || substr == '?');//todo: add wildcard matching
 	};
 
 	std::string_view substr = pattern;
