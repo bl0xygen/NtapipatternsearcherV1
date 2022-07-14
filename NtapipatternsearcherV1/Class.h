@@ -16,9 +16,10 @@ public:
 	}; Info info;
 	uintptr_t FindId(const wchar_t* processname);
 	void GetRemotePEBmodules(uintptr_t procid);
-	void IterateModules(uintptr_t procid, char* pattern);
+	void IterateModules(uintptr_t procid, char* pattern, bool mask);
 private:
 	void LocateBytes(char* pattern, char* arr, size_t arrsize, uintptr_t currentAdd);
+	void LocateBytesWithMask(char* pattern, char* arr, size_t arrsize, uintptr_t currentAdd);
 
 	
 

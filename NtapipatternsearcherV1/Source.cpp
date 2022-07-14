@@ -17,12 +17,16 @@ int main(void) {
 	//search for the pattern using module base + size 
 
 	//example pattern
-	char* pattern = new char[] {"\x4d\x5a\x90\x00"};//todo: write function to parse user input and format to byte array
+	char* pattern = new char[] {"\x4d\x5a\x90?"};//todo: write function to parse user input and format to byte array
 
 
 	std::cout << "\n pattern " << pattern << std::endl;
 
-	find.IterateModules(procid, pattern);
+	bool mask = true;
+
+	find.IterateModules(procid, pattern, mask);
 
 	delete[] pattern;
+
+	return 0;
 }

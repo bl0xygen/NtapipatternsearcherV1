@@ -84,8 +84,6 @@ void NtPatternClass::GetRemotePEBmodules(uintptr_t procid) {
 
 	printf("\nProcess Handle opened with PROCESS_QUERY_INFORMATION | PROCESS_VM_READ privileges\n");
 
-
-
 	tdNtReadVirtualMemory NtReadVirtualMem = 0;
 	NtReadVirtualMem = (tdNtReadVirtualMemory)GetProcAddress(hMod, "NtReadVirtualMemory");
 
@@ -160,7 +158,7 @@ void NtPatternClass::GetRemotePEBmodules(uintptr_t procid) {
 }
 
 
-void NtPatternClass::IterateModules(uintptr_t procid, char* pattern) {
+void NtPatternClass::IterateModules(uintptr_t procid, char* pattern, bool mask) {
 
 
 	HMODULE hMod = LoadLibraryW(L"ntdll.dll");
@@ -197,7 +195,7 @@ void NtPatternClass::IterateModules(uintptr_t procid, char* pattern) {
 	for (int i = 0; i < info.ModuleBaseAdd.size(); i++) {
 		
 		info.base = info.ModuleBaseAdd[i];
-		std::wcout << "Module Names: " << info.ModuleName[i] << std::endl;
+		std::wcout << "\nModule Name: " << info.ModuleName[i] << std::endl;
 
 		//call mbi on the starting address and fill an array with the first page returned
 
@@ -230,8 +228,12 @@ void NtPatternClass::IterateModules(uintptr_t procid, char* pattern) {
 				}
 				memory = new char[mbi.RegionSize];
 				status = NtReadVirtualMem(processhandle, reinterpret_cast<void*>(info.base), memory, mbi.RegionSize, NULL);
-
-				LocateBytes(pattern, memory, mbi.RegionSize, currentAdd);
+				if (mask == true) {
+					LocateBytesWithMask(pattern, memory, mbi.RegionSize, currentAdd);
+				}
+				else {
+					LocateBytes(pattern, memory, mbi.RegionSize, currentAdd);
+				}
 			}
 
 
@@ -253,7 +255,7 @@ void NtPatternClass::LocateBytes(char* pattern, char* arr, size_t arrsize, uintp
 	std::vector<char>memblock(arr, arr + arrsize);
 
 	auto predicate = [](char memblock, char substr) {
-		return (memblock == substr || substr == '?'); //todo: fix wildcards not matching
+
 		return (memblock == substr || substr == '?');//todo: add wildcard matching
 	};
 
@@ -269,6 +271,30 @@ void NtPatternClass::LocateBytes(char* pattern, char* arr, size_t arrsize, uintp
 		std::cout << "\nBytes found at offset from base: " << std::hex << foundbytes << std::endl;
 
 		return;
+	}
+
+}
+
+
+void NtPatternClass::LocateBytesWithMask(char* pattern, char* arr, size_t arrsize, uintptr_t currentAdd) {
+
+
+	std::vector<char>memblock(arr, arr + arrsize);
+	int patlen = std::strlen(pattern) - 1;
+	for (int i = 0; i < memblock.size(); i++) {
+		for (int j = 0; j <= patlen; j++) {
+			if (i == memblock.size() - patlen) {//if no pattern is found at the very end of the vector - the pattern length, return
+				return;
+			}
+			if (pattern[j] != memblock[i + j] && pattern[j] != '?') {
+				break;
+			}
+
+			if (patlen == j) {
+				std::cout << "\nFound pattern, offset: " << i + (currentAdd - info.base);
+			}
+
+		}
 	}
 
 }
